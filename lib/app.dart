@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-//import 'package:quotes/ui/card/quotelist.dart';
 import 'package:quotes/ui/sildeshow.dart';
+import 'package:quotes/ui/Pages/loginpage.dart';
 
 
 class QuotesApp extends StatelessWidget {
@@ -12,7 +12,7 @@ class QuotesApp extends StatelessWidget {
         
        ),
       debugShowCheckedModeBanner: false,
-      home: FirestoreSlideshow(),
+      home: LoginPage(),//FirestoreSlideshow(),
       // routes: {
       //   '/': (context) => FirestoreSlideshow(),
       // //  '/login': (context) => LoginScreen(),

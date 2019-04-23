@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:circular_bottom_navigation/circular_bottom_navigation.dart';
-import 'package:circular_bottom_navigation/tab_item.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 class FirestoreSlideshow extends StatefulWidget {
   createState() => FirestoreSlideshowState();
@@ -19,18 +17,17 @@ class FirestoreSlideshowState extends State<FirestoreSlideshow> {
   Color backgroundColor = Colors.white;
   // Keep track of current page to avoid unnecessary renders
   int currentPage = 0;
+  bool _isfav = false;
 
-  // Circular Bottom Navigation fields
-  int selectedPos = 0;
-  CircularBottomNavigationController _navigationController;
-  
+// Icon configuration for NavBar.
+  static double iconSize = 30;
+  static Color iconColor = Colors.black45;
 
   @override
   void initState() {
     _queryDb();
 
     // Circular Bottom Navigation fields
-    _navigationController = new CircularBottomNavigationController(selectedPos);
 
     // Set state when page changes
     ctrl.addListener(() {
@@ -46,15 +43,6 @@ class FirestoreSlideshowState extends State<FirestoreSlideshow> {
 
   @override
   Widget build(BuildContext context) {
-    double pageheight = MediaQuery.of(context).size.height;
-
-    List<TabItem> tabItems = List.of([
-      new TabItem(Icons.home, "Home", Colors.blue),
-      new TabItem(Icons.search, "Search", Colors.orange),
-      new TabItem(Icons.layers, "Reports", Colors.red),
-      new TabItem(Icons.notifications, "Notifications", Colors.cyan),
-    ]);
-
     return StreamBuilder(
         stream: slides,
         initialData: [],
@@ -73,21 +61,19 @@ class FirestoreSlideshowState extends State<FirestoreSlideshow> {
                     // Active page
                     bool active = currentIdx == currentPage;
                     return _buildStoryPage(
-                        slideList[currentIdx - 1], active, pageheight);
+                      slideList[currentIdx - 1],
+                      active,
+                    );
                   }
                 }),
-            bottomNavigationBar: CircularBottomNavigation(
-              tabItems,
-               controller: _navigationController,
-            ),
+            bottomNavigationBar: _buildNavigationBar(),
           );
         });
   }
 
   Stream _queryDb({String tag}) {
     // Make a Query
-    Query query =
-        db.collection('Stories'); //.where('tags', arrayContains: tag);
+    Query query = db.collection('Stories').where('tags', arrayContains: tag);
 
     // Map the documents to the data payload
     slides =
@@ -101,21 +87,16 @@ class FirestoreSlideshowState extends State<FirestoreSlideshow> {
 
   // Builder Functions
 
-  _buildStoryPage(Map data, bool active, double height) {
+  _buildStoryPage(
+    Map data,
+    bool active,
+  ) {
     // Animated Properties
-    final double blur = active ? 30 : 0;
+    final double blur = active ? 20 : 0;
     final double offset = active ? 20 : 0;
     final double top = active ? 100 : 200;
-    
-    // CachedNetworkImage image  = CachedNetworkImage(
-    //   imageUrl: data['img'],
-    //   placeholder: (context, url) => CircularProgressIndicator(),
-    //   errorWidget: (context, url, error) => new Icon(Icons.error),
-    // ); 
-    //cannot use as per current build using animated containers
-    
+
     return AnimatedContainer(
-      height: height,
       duration: Duration(milliseconds: 500),
       curve: Curves.easeOutQuint,
       margin: EdgeInsets.only(top: top, bottom: 50, right: 30),
@@ -131,16 +112,33 @@ class FirestoreSlideshowState extends State<FirestoreSlideshow> {
                 blurRadius: blur,
                 offset: Offset(offset, offset))
           ]),
-      child: Center(
-          child: Text(
-        data['title'],
-        style: TextStyle(
-          fontSize: 40,
-          inherit: false,
-          color: Colors.white,
-        ),
-        textAlign: TextAlign.center,
-      )),
+      child: Stack(
+        children: <Widget>[
+          Positioned(
+            bottom: 24,
+            right: 24,
+            child: Material(
+              elevation: 10,
+              type: MaterialType.circle,
+              color: Colors.transparent,
+              child: Icon(
+                _isfav ? Icons.favorite : Icons.favorite_border,
+                color: _isfav ? Colors.redAccent : Colors.white,
+                size: 30,
+              ),
+            ),
+          ),
+          Center(
+              child: Text(
+            data['title'],
+            style: TextStyle(
+              fontSize: 40,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          )),
+        ],
+      ),
     );
   }
 
@@ -154,10 +152,7 @@ class FirestoreSlideshowState extends State<FirestoreSlideshow> {
         Text(
           'Your Stories',
           style: TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
-              inherit: false,
-              color: Colors.black),
+              fontSize: 40, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         SizedBox(
           height: 25,
@@ -170,8 +165,7 @@ class FirestoreSlideshowState extends State<FirestoreSlideshow> {
         SizedBox(
           height: 25,
         ),
-        Text('FILTER STORIES',
-            style: TextStyle(inherit: false, color: Colors.black26)),
+        Text('FILTER STORIES', style: TextStyle(color: Colors.black26)),
         _buildButton('favorites'),
         _buildButton('mountains'),
         _buildButton('road')
@@ -191,11 +185,42 @@ class FirestoreSlideshowState extends State<FirestoreSlideshow> {
         onPressed: () => _queryDb(tag: tag));
   }
 
-    @override
-  void dispose() {
-    super.dispose();
-    _navigationController.dispose();
+  _buildNavigationBar() {
+    return CurvedNavigationBar(
+      backgroundColor: Colors.white,
+      color: Colors.black12,
+      height: 60,
+      items: <Widget>[
+        Icon(
+          Icons.home,
+          size: iconSize,
+          color: iconColor,
+        ),
+        Icon(
+          Icons.local_florist,
+          size: iconSize,
+          color: iconColor,
+        ),
+        Icon(
+          Icons.settings,
+          size: iconSize,
+          color: iconColor,
+        ),
+        Icon(
+          Icons.share,
+          size: iconSize,
+          color: iconColor,
+        ),
+      ],
+      onTap: (index) {
+        //Handle button tap
+        switch (index) {
+          case 0:
+            {
+             
+            }
+        }
+      },
+    );
   }
 }
-
-
