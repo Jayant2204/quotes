@@ -257,7 +257,7 @@ class _LoginPageState extends State<LoginPage>
         hintText: "Password",
         hintStyle: TextStyle(fontFamily: "WorkSansSemiBold", fontSize: 17.0),
         suffixIcon: GestureDetector(
-          onTap: _login ? _toggleLogin
+          onTap: _islogin ? _toggleLogin
           : !_isCheck ? _toggleSignup : _toggleSignupConfirm,
           child: Icon(
             Icons.remove_red_eye,
