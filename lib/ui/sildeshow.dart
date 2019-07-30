@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:quotes/ui/style/themeselector.dart';
+//import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:quotes/style/themeselector.dart';
 import 'package:provider/provider.dart';
-import 'package:quotes/ui/style/theme.dart';
-
+import 'package:quotes/style/themechanger.dart';
+import 'package:quotes/ui/bottomNav/curved_navigation_bar.dart';
 class Slideshow extends StatefulWidget {
   createState() => SlideshowState();
 }

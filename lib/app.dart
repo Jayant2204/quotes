@@ -1,21 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:quotes/class/db.dart';
+import 'package:quotes/class/models.dart';
 import 'package:quotes/ui/sildeshow.dart';
-import 'package:quotes/ui/style/theme.dart';
+import 'package:quotes/style/themechanger.dart';
 import 'package:provider/provider.dart';
-import 'package:quotes/ui/style/colors.dart';
+import 'package:quotes/themes/dark.dart';
+
 
 class QuotesApp extends StatelessWidget {
+  final db = DatabaseService();
+  final quoteCategory = '' ;
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<ThemeChanger>(
-          builder: (_) => ThemeChanger(
-            _darkTheme(),
+        //returns a ThemeChanger that uses the ThemeData.dark() factory to generate a dark theme by default
+        ChangeNotifierProvider<ThemeChanger>.value(
+          value: ThemeChanger(
+            darkTheme(),
           ),
         ),
+        //Stream Provider returning List of all the category of Quotes used on HomePage.
+        //Here Value is used instead of builder due to changes in provider package v3.
+        StreamProvider<List<QuoteType>>.value(  
+          value: db.quoteType(),
+          ),
+
+        // New StreamProvider for Quotes list.
+        StreamProvider<List<Quotes>>.value(
+          value: db.quotes(quoteCategory),
+        ),
       ],
-      //returns a ThemeChanger that uses the ThemeData.dark() factory to generate a dark theme by default
+      
       child: new MaterialAppWithTheme(),
       //Extract The Widget to a new Widget so that ThemeChanger can be used using Provider.of():
     );
@@ -34,51 +50,4 @@ class MaterialAppWithTheme extends StatelessWidget {
       home: Slideshow(),
     );
   }
-}
-
-ThemeData _darkTheme() {
-  final ThemeData base = ThemeData.dark();
-  return base.copyWith(
-      accentColor: kDarkGrey,
-      primaryColor: kDarkGrey,
-      brightness: Brightness.dark,
-      bottomAppBarColor: Colors.white24,
-      buttonTheme: base.buttonTheme.copyWith(
-        buttonColor: kYellow,
-        textTheme: ButtonTextTheme.normal,
-      ),
-      iconTheme: base.iconTheme.copyWith(
-        color: kYellow,
-        size: 30.0,
-      ),
-      scaffoldBackgroundColor: kDarkGrey,
-      cardColor: kDarkGrey,
-      textSelectionColor: kCyan,
-      errorColor: kErrorRed,
-      textTheme: darkTextTheme(base.textTheme),
-      primaryTextTheme: darkTextTheme(base.primaryTextTheme),
-      accentTextTheme: darkTextTheme(base.accentTextTheme),
-      primaryIconTheme: base.iconTheme.copyWith(color: kYellow),
-      cursorColor: kYellow,
-      textSelectionHandleColor: kSurfaceWhite.withAlpha(153),
-      dividerColor: kBackgroundWhite.withOpacity(0.5));
-}
-
-TextTheme darkTextTheme(TextTheme base) {
-  return base
-      .copyWith(
-        headline: base.headline.copyWith(
-          fontWeight: FontWeight.w500,
-        ),
-        title: base.title.copyWith(fontSize: 18.0),
-        caption: base.caption.copyWith(
-          fontWeight: FontWeight.w400,
-          fontSize: 14.0,
-        ),
-      )
-      .apply(
-        fontFamily: 'Rubik',
-        displayColor: kSurfaceWhite,
-        bodyColor: kSurfaceWhite,
-      );
 }
